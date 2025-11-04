@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Productos - Maquillaje</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3d3d3d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --accent-pink: #ff4d8d;
+            --accent-purple: #a64dff;
+            --accent-green: #00cc66;
+            --accent-red: #ff4d4d;
+            --accent-orange: #ff9933;
+            --border-color: #555555;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--accent-pink);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logout-btn {
+            background: var(--accent-red);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #cc0000;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: var(--accent-pink);
+            text-align: center;
+            margin: 0;
+            font-size: 2.2em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .filtros {
+            background: var(--bg-tertiary);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .filtro-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .filtro-item {
+            flex: 1;
+            min-width: 220px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--accent-pink);
+            font-size: 14px;
+        }
+        
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--accent-purple);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: var(--accent-pink);
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .btn-buscar {
+            background: linear-gradient(135deg, var(--accent-green), #00994d);
+        }
+        
+        .btn-limpiar {
+            background: linear-gradient(135deg, #666666, #999999);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+        
+        th {
+            background: linear-gradient(135deg, var(--accent-purple), #7a3dcc);
+            color: white;
+            position: sticky;
+            top: 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+        
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.01);
+            transition: transform 0.2s;
+        }
+        
+        .stock-bajo {
+            background: rgba(255, 77, 77, 0.2) !important;
+            color: var(--accent-red);
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        .disponible {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+        
+        .no-disponible {
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .inactivo {
+            opacity: 0.5;
+            background: rgba(102, 102, 102, 0.2);
+        }
+        
+        .badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .badge-success {
+            background: var(--accent-green);
+            color: black;
+        }
+        
+        .badge-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+        
+        .total-registros {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .mensaje-bienvenida {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-secondary);
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .icono-grande {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .sugerencias {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-green);
+        }
+        
+        .sugerencias h3 {
+            color: var(--accent-green);
+            margin-top: 0;
+        }
+        
+        .sugerencias ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sugerencias li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .sugerencias li:last-child {
+            border-bottom: none;
+        }
+        
+        .no-resultados {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filtro-group {
+                flex-direction: column;
+            }
+            
+            .filtro-item {
+                min-width: 100%;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header con botón de cerrar sesión -->
+        <div class="header">
+            <h1>Consultar productos de almacén</h1>
+            <div class="user-info">
+                <span>👤 {{ user.IdLogin }}</span>
+                <a href="{% url 'logout' %}" class="logout-btn">
+                    🚪 Cerrar Sesión
+                </a>
+            </div>
+        </div>
+        
+        <!-- Formulario de Filtros -->
+        <div class="filtros">
+            <form method="get">
+                <div class="filtro-group">
+                    <div class="filtro-item">
+                        <label for="codigo">🔍 Código:</label>
+                        <input type="text" id="codigo" name="codigo" value="{{ codigo_busqueda }}" placeholder="Ej: MAQ-001">
+                    </div>
+                    <br>
+                    <div class="filtro-item">
+                        <label for="articulo">📦 Artículo:</label>
+                        <input type="text" id="articulo" name="articulo" value="{{ articulo_busqueda }}" placeholder="Ej: Base Líquida">
+                    </div>
+                    <br>
+                    <div class="filtro-item">
+                        <label for="marca">🏷️ Marca:</label>
+                        <input type="text" id="marca" name="marca" value="{{ marca_busqueda }}" placeholder="Ej: Maybelline">
+                    </div>
+                    <br>
+                </div>
+                
+                <div class="filtro-group">
+                    <div class="filtro-item">
+                        <label for="estatus">📊 Estatus:</label>
+                        <select id="estatus" name="estatus">
+                            <option value="">Todos</option>
+                            <option value="1" {% if estatus_busqueda == "1" %}selected{% endif %}>✅ Activo</option>
+                            <option value="0" {% if estatus_busqueda == "0" %}selected{% endif %}>❌ Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filtro-group">
+                    <button type="submit" class="btn-buscar">🔍 Buscar</button>
+                    <button type="button" onclick="location.href='{% url 'consulta_productos' %}'" class="btn-limpiar">🔄 Limpiar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Contenido dinámico -->
+        {% if not busqueda_realizada %}
+            <!-- Mensaje de bienvenida cuando no hay búsqueda -->
+            <div class="mensaje-bienvenida">
+                <span class="icono-grande">🔍</span>
+                <h2>Bienvenido al Sistema de Consulta de Productos</h2>
+                <p>Utiliza los filtros anteriores para buscar productos en el inventario.</p>
+                <p>Puedes buscar por código, artículo, marca o estatus.</p>
+            </div>
+        
+        {% else %}
+            <!-- Resultados cuando hay búsqueda -->
+            <div class="total-registros">
+                📊 Resultados encontrados: {{ productos.count }}
+            </div>
+
+            {% if productos %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>🔖 Código</th>
+                            <th>📦 Artículo</th>
+                            <th>🏷️ Marca</th>
+                            <th>📋 Disponibilidad</th>
+                            <th>📝 Descripción</th>
+                            <th>📊 Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos %}
+                        <tr class="{% if producto.Estatus == 0 %}inactivo{% endif %}">
+                            <td><strong>{{ producto.CODIGO }}</strong></td>
+                            <td>{{ producto.ARTICULO }}</td>
+                            <td>{{ producto.MARCA }}</td>
+                            
+                            <td>
+                                {% if producto.CANT and producto.CANT > 0 %}
+                                    <span class="disponible">✅ Disponible</span>
+                                {% else %}
+                                    <span class="no-disponible">❌ No disponible</span>
+                                {% endif %}
+                            </td>
+                            
+                            <td title="{{ producto.DESCRIP }}">
+                                {{ producto.DESCRIP|truncatewords:5 }}
+                            </td>
+                            <td>
+                                {% if producto.Estatus == 1 %}
+                                    <span class="badge badge-success">✅ Activo</span>
+                                {% else %}
+                                    <span class="badge badge-danger">❌ Inactivo</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="no-resultados">
+                    <h3>🔍 No se encontraron productos</h3>
+                    <p>No hay productos que coincidan con los criterios de búsqueda.</p>
+                    <p>Intenta con otros filtros o términos de búsqueda.</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>
